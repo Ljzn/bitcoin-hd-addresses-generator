@@ -1,4 +1,6 @@
-import './polyfills.js'; // 确保先导入polyfills
+import './buffer-shim.js'; // 首先导入完整的 buffer shim
+import './buffer-polyfill.js'; // 然后导入 buffer polyfill
+import './polyfills.js'; // 然后导入其他 polyfills
 import './style.css';
 import * as buffer from 'buffer';
 import * as bip39 from 'bip39';
@@ -6,11 +8,31 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from 'tiny-secp256k1';
 import * as bip32 from 'bip32';
 
-// 设置全局 Buffer
+// 确保全局 Buffer 完全可用
 if (typeof window !== 'undefined') {
+  // 完全替换之前的占位符Buffer对象
+  // 直接使用buffer模块提供的完整实现
   window.Buffer = buffer.Buffer;
+  
+  // 确保全局对象可用
   window.global = window;
+  if (!window.process) window.process = { env: {} };
+  
+  // 打印Buffer状态
+  console.log('在main.js中添加的Buffer:', {
+    isBuffer: typeof window.Buffer.isBuffer === 'function',
+    alloc: typeof window.Buffer.alloc === 'function',
+    from: typeof window.Buffer.from === 'function'
+  });
 }
+
+// 日志记录可用的 Buffer 方法，帮助调试
+console.log('Buffer 方法检查:', {
+  isBuffer: typeof window.Buffer.isBuffer === 'function',
+  alloc: typeof window.Buffer.alloc === 'function',
+  from: typeof window.Buffer.from === 'function',
+  concat: typeof window.Buffer.concat === 'function'
+});
 
 // 初始化签名库
 bitcoin.initEccLib(ecc);

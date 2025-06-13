@@ -24,7 +24,7 @@ export default defineConfig({
   define: {
     'process.env': {},
     global: 'globalThis',
-    'Buffer': ['buffer', 'Buffer'],
+    // 不要在这里定义Buffer，避免编译时混淆
   },
   build: {
     rollupOptions: {
@@ -42,6 +42,7 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
+    include: ['buffer', 'crypto-browserify', 'stream-browserify', 'assert'],
     esbuildOptions: {
       define: {
         global: 'globalThis'
