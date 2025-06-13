@@ -8599,7 +8599,7 @@ PROCEED WITH CAUTION!
   function Fu(e) {
     Cu(e) || Me(ns);
   }
-  const Du = "/assets/secp256k1-2IQOMy_D.wasm";
+  const Du = "/bitcoin-hd-addresses-generator/assets/secp256k1-2IQOMy_D.wasm";
   var ni = [
     "buffer",
     "Buffer"
