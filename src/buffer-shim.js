@@ -10,10 +10,10 @@ const BufferClass = BufferModule.Buffer;
 // 将 buffer 模块保存到全局对象
 if (typeof window !== 'undefined') {
   window.bufferModule = BufferModule;
-  
+
   // 确保Buffer类在全局可用
   window.Buffer = BufferClass;
-  
+
   // 日志记录Buffer状态
   console.log('Buffer检查: ', {
     exists: !!BufferClass,

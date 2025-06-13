@@ -13,11 +13,11 @@ if (typeof window !== 'undefined') {
   // 完全替换之前的占位符Buffer对象
   // 直接使用buffer模块提供的完整实现
   window.Buffer = buffer.Buffer;
-  
+
   // 确保全局对象可用
   window.global = window;
   if (!window.process) window.process = { env: {} };
-  
+
   // 打印Buffer状态
   console.log('在main.js中添加的Buffer:', {
     isBuffer: typeof window.Buffer.isBuffer === 'function',
@@ -108,7 +108,7 @@ copyResults.addEventListener('click', () => {
     const cells = Array.from(row.querySelectorAll('td'));
     return cells.map(cell => cell.textContent.trim()).join('\t');
   }).join('\n');
-  
+
   navigator.clipboard.writeText(textToCopy).then(() => {
     const originalText = copyResults.textContent;
     copyResults.textContent = '复制成功!';
@@ -121,7 +121,7 @@ copyResults.addEventListener('click', () => {
 // 主要函数：派生地址
 deriveAddressesBtn.addEventListener('click', async () => {
   clearError();
-  
+
   try {
     // 获取并验证助记词
     const mnemonic = mnemonicInput.value.trim();
@@ -129,12 +129,12 @@ deriveAddressesBtn.addEventListener('click', async () => {
       showError('请输入助记词');
       return;
     }
-    
+
     if (!bip39.validateMnemonic(mnemonic)) {
       showError('无效的助记词格式');
       return;
     }
-    
+
     // 获取派生路径
     let path = derivationPathPreset.value;
     if (path === 'custom') {
@@ -144,40 +144,40 @@ deriveAddressesBtn.addEventListener('click', async () => {
         return;
       }
     }
-    
+
     // 获取密码短语
     const passphraseValue = usePassphrase.checked ? passphrase.value : '';
-    
+
     // 获取地址数量
     const count = parseInt(addressCount.value);
     if (isNaN(count) || count < 1 || count > 1000) {
       showError('请输入1-1000之间的地址数量');
       return;
     }
-    
+
     // 派生地址
     const seed = await bip39.mnemonicToSeed(mnemonic, passphraseValue);
     const rootKey = BIP32Factory.fromSeed(seed);
-    
+
     // 获取路径的基本部分（不含最后的索引）
     const pathBase = path.endsWith('/') ? path.slice(0, -1) : path;
     const lastSlashIndex = pathBase.lastIndexOf('/');
     const basePath = pathBase.substring(0, lastSlashIndex);
-    
+
     // 清除旧结果
     addressResults.innerHTML = '';
-    
+
     // 确定地址类型
     const addressType = getAddressTypeFromPath(path);
-    
+
     // 生成地址
     for (let i = 0; i < count; i++) {
       const fullPath = `${basePath}/${i}`;
       const childKey = rootKey.derivePath(fullPath);
-      
+
       // 根据不同路径创建不同类型的地址
       const address = generateAddress(childKey, addressType);
-      
+
       // 添加到结果表格
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -187,10 +187,10 @@ deriveAddressesBtn.addEventListener('click', async () => {
       `;
       addressResults.appendChild(row);
     }
-    
+
     // 显示结果区域
     resultSection.classList.remove('d-none');
-    
+
   } catch (error) {
     showError(`派生地址失败: ${error.message}`);
     console.error(error);
@@ -208,7 +208,7 @@ function getAddressTypeFromPath(path) {
   } else if (path.startsWith('m/86\'/0\'')) {
     return 'p2tr'; // Taproot
   }
-  
+
   // 默认为原生SegWit
   return 'p2wpkh';
 }
@@ -216,36 +216,36 @@ function getAddressTypeFromPath(path) {
 // 根据不同类型生成地址
 function generateAddress(childKey, addressType) {
   const publicKey = childKey.publicKey;
-  
+
   switch (addressType) {
     case 'p2pkh': // Legacy
-      return bitcoin.payments.p2pkh({ 
+      return bitcoin.payments.p2pkh({
         pubkey: publicKey
       }).address;
-    
+
     case 'p2sh-p2wpkh': // SegWit
       return bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wpkh({ pubkey: publicKey })
       }).address;
-    
+
     case 'p2wpkh': // Native SegWit
-      return bitcoin.payments.p2wpkh({ 
+      return bitcoin.payments.p2wpkh({
         pubkey: publicKey
       }).address;
-    
+
     case 'p2tr': // Taproot
       // 注意：bitcoinjs-lib的Taproot支持可能需要特殊处理
       try {
         // 对于Taproot，我们需要x-only公钥（32字节）
         const xOnlyPubKey = publicKey.slice(1, 33);
-        return bitcoin.payments.p2tr({ 
+        return bitcoin.payments.p2tr({
           internalPubkey: xOnlyPubKey
         }).address;
       } catch (e) {
         console.error('Taproot地址生成失败:', e);
         return `Taproot暂不支持 (${e.message})`;
       }
-    
+
     default:
       throw new Error(`不支持的地址类型: ${addressType}`);
   }
