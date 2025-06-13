@@ -3,7 +3,12 @@ import { resolve } from 'path';
 import wasm from 'vite-plugin-wasm';
 import topLevelAwait from 'vite-plugin-top-level-await';
 
+// 获取仓库名称，用于GitHub Pages部署
+const repositoryName = 'bitcoin-hd-addresses-generator'; // 请根据您实际的GitHub仓库名称修改
+
 export default defineConfig({
+  // 设置基础路径，用于GitHub Pages部署
+  base: `/${repositoryName}/`,
   plugins: [
     wasm(),
     topLevelAwait()
